@@ -10,12 +10,14 @@ QT_END_NAMESPACE
 class GitChatConfig : public QMainWindow
 {
     Q_OBJECT
-
 public:
     GitChatConfig(QWidget *parent = nullptr);
     ~GitChatConfig();
-
+signals:
+    void gitLogin(QString gitUrl, QString login, QString password);
 private:
     Ui::GitChatConfig *ui;
+private slots:
+    void on_pushButton_clicked();
 };
 #endif // MAINWINDOW_H

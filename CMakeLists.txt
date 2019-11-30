@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
@@ -18,6 +18,11 @@ add_executable(GitChat
   GitChatConfig.cpp
   GitChatConfig.h
   GitChatConfig.ui
+  ListViewDelegate.cpp
+  ListViewDelegate.h
+  GitChat.cpp
+  GitChat.h
+  GitChat.ui
   Git.cpp
   Git.h
 )
