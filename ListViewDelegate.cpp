@@ -34,10 +34,6 @@
 
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
-
-    // uncomment to see the area provided to paint this item
-    //painter->drawRect(option.rect);
-
     painter->translate(option.rect.left() + d_horizontalmargin, option.rect.top() + ((index.row() == 0) ? d_verticalmargin : 0));
 
     // background color for chat bubble

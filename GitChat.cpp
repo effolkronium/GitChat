@@ -2,6 +2,7 @@
 #include "Git.h"
 #include "ListViewDelegate.h"
 #include <QScrollBar>
+#include <QMessageBox>
 #include <chrono>
 #include "./ui_GitChat.h"
 
@@ -14,6 +15,8 @@ GitChat::GitChat(Git& git)
 {
     ui->setupUi(this);
 
+    qRegisterMetaType<MessageType>();
+
     ui->listView->setResizeMode(QListView::Adjust);
     ui->listView->setWordWrap(true);
     ui->listView->setModel(&m_model);
@@ -21,19 +24,8 @@ GitChat::GitChat(Git& git)
 
     ui->listView->setItemDelegate(new ListViewDelegate());
 
-    // create some data and put it in a model
-    for(int i = 0; i < 256; ++i)
-    {
-        QStandardItem *item1 = new QStandardItem("This is item one");
-        item1->setData("Incoming", Qt::UserRole + 1);
-        m_model.appendRow(item1);
-        QStandardItem *item2 = new QStandardItem("This is item two, it is a very long item, but it's not the item's fault, it is me typing all this text.");
-        item2->setData("Outgoing", Qt::UserRole + 1);
-        m_model.appendRow(item2);
-        QStandardItem *item3 = new QStandardItem("This is the third item");
-        item3->setData("Incoming", Qt::UserRole + 1);
-        m_model.appendRow(item3);
-    }
+    connect(this, &GitChat::SignalAddMessages, this, &GitChat::AddMessages);
+    connect(this, &GitChat::SignalGitThreadError, this, &GitChat::GitThreadError, Qt::ConnectionType::BlockingQueuedConnection);
 
     StartGitListeningThread();
 }
@@ -49,24 +41,62 @@ GitChat::~GitChat()
 
 void GitChat::StartGitListeningThread()
 {
+    m_running = true;
     m_gitThread = std::thread{[this]{
-        while(m_running)
-        {
-            std::this_thread::sleep_for(2s);
+        try {
+            while(m_running)
+            {
+                auto messages = this->m_git.GetNewMessages();
+                emit SignalAddMessages(std::move(messages));
+                std::this_thread::sleep_for(10s);
+            }
+        } catch (const std::exception& err) {
+            emit SignalGitThreadError(QString{"Error: "} + err.what());
         }
     }};
 }
 
-void GitChat::AddIncomingMessage(QString message)
+void GitChat::AddMessages(std::queue<std::pair<QString, QString>> messages)
 {
-    auto item = std::make_unique<QStandardItem>(message);
+    while(!messages.empty())
+    {
+        auto& message = messages.front();
+        if(m_git.GetLogin() == message.first)
+            AddOutgoingMessage(message.first, message.second);
+        else
+            AddIncomingMessage(message.first, message.second);
+
+        messages.pop();
+    }
+
+    ui->listView->scrollToBottom();
+}
+
+void GitChat::GitThreadError(const QString& message)
+{
+    QMessageBox msgBox;
+    msgBox.setFixedSize(500,200);
+    msgBox.critical(nullptr, "Error: ", message);
+    std::terminate();
+}
+
+void GitChat::AddIncomingMessage(const QString& author, const QString& message)
+{
+    auto item = std::make_unique<QStandardItem>(QString{"\""} + author + QString{"\""} + QString{": "} + message);
     item->setData("Incoming", Qt::UserRole + 1);
     m_model.appendRow(item.release());
 }
 
-void GitChat::AddOutgoingMessage(QString message)
+void GitChat::AddOutgoingMessage(const QString& author, const QString& message)
 {
-    auto item = std::make_unique<QStandardItem>(message);
+    auto item = std::make_unique<QStandardItem>(QString{"\""} + author + QString{"\""} + QString{": "} + message);
     item->setData("Outgoing", Qt::UserRole + 1);
     m_model.appendRow(item.release());
+}
+
+void GitChat::on_lineEdit_returnPressed()
+{
+    m_git.PushMessage(m_git.GetLogin(), ui->lineEdit->text());
+    AddOutgoingMessage(m_git.GetLogin(), ui->lineEdit->text());
+    ui->lineEdit->clear();
 }

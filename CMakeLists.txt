@@ -25,6 +25,7 @@ add_executable(GitChat
   GitChat.ui
   Git.cpp
   Git.h
+  thread_safe_queue.hpp
 )
 
 target_link_libraries(GitChat PRIVATE Qt5::Widgets)
