@@ -11,6 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(Threads REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 add_executable(GitChat
@@ -28,4 +29,4 @@ add_executable(GitChat
   thread_safe_queue.hpp
 )
 
-target_link_libraries(GitChat PRIVATE Qt5::Widgets)
+target_link_libraries(GitChat PRIVATE Qt5::Widgets Threads::Threads)
