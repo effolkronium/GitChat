@@ -100,3 +100,8 @@ void GitChat::on_lineEdit_returnPressed()
     AddOutgoingMessage(m_git.GetLogin(), ui->lineEdit->text());
     ui->lineEdit->clear();
 }
+
+void GitChat::on_GitChat_destroyed()
+{
+    std::exit(0);
+}

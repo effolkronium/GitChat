@@ -15,13 +15,12 @@ Git::Git(QString gitUrl, QString login, const QString& password)
         return std::move(gitUrl.replace("https://", "https://" + login + ":" + password + "@"));
       }()),
       m_gitLogin{std::move(login)},
-      m_gitRepoPath{"C:\\_\\1"},
-      //m_gitRepoPath{QDir::tempPath()  + QDir::separator() + QUuid::createUuid().toString()},
+      m_gitRepoPath{QDir::tempPath()  + QDir::separator() + QUuid::createUuid().toString()},
       m_gitMessagesPath{m_gitRepoPath + QDir::separator() + "messages"}
 {
-  //  CloneRepo();
-   // if(IsNewRepo())
-  //      InitRepo();
+    CloneRepo();
+    if(IsNewRepo())
+        InitRepo();
 
     m_isRunning = true;
     m_newMsgThread = std::thread{[this]{
@@ -65,10 +64,10 @@ Git::Git(QString gitUrl, QString login, const QString& password)
 
 Git::~Git()
 {
+    m_isRunning = false;
     if(m_newMsgThread.joinable())
         m_newMsgThread.join();
 
-    return;
     try {
         QDir{m_gitRepoPath}.removeRecursively();
     } catch (const std::exception& err) {

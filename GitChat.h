@@ -33,6 +33,8 @@ signals:
 private slots:
     void on_lineEdit_returnPressed();
 
+    void on_GitChat_destroyed();
+
 private:
     void GitThreadError(const QString& message);
     void AddMessages(MessageType messages);
