@@ -44,12 +44,13 @@ Git::Git(QString gitUrl, QString login, const QString& password)
                     throw std::runtime_error{"New message db is smaller then old"};
 
                 QTextStream in(&file);
+                in.setCodec("UTF-8");
 
                 while(!m_toSend.empty())
                 {
                     std::tuple<QString, QString, QString> nextMsg;
                     m_toSend.wait_and_pop(nextMsg);
-                    in << '\n' << std::get<0>(nextMsg) << "," << std::get<1>(nextMsg) << "," << std::get<2>(nextMsg);
+                    in << '\n' << std::get<0>(nextMsg).toUtf8() << "," << std::get<1>(nextMsg).toUtf8() << "," << std::get<2>(nextMsg).toUtf8();
                 }
 
                 in.flush();
@@ -136,6 +137,7 @@ void Git::FixConflicts()
 
         {
             QTextStream in(&file);
+            in.setCodec("UTF-8");
 
             if(!in.seek(0))
                 throw std::runtime_error{"if(!file.seek(m_messagePos))"};
@@ -154,7 +156,7 @@ void Git::FixConflicts()
             if(!in.seek(0))
                 throw std::runtime_error{"if(!file.seek(m_messagePos))"};
 
-            in << textWithoutConflits;
+            in << textWithoutConflits.toUtf8();
 
             in.flush();
         }
@@ -198,6 +200,7 @@ std::queue<std::pair<QString, QString>> Git::GetNewMessages()
         throw std::runtime_error{"New message db is smaller then old"};
 
     QTextStream in(&file);
+    in.setCodec("UTF-8");
 
     if(!in.seek(m_messagePos))
         throw std::runtime_error{"if(!file.seek(m_messagePos))"};
