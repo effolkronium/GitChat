@@ -35,6 +35,7 @@ private:
     QString m_gitMessagesPath;
     qint64 m_messagePos = 0;
     std::mutex m_mutex;
+    std::mutex gc_mutex;
     std::mutex m_presendMsgGuids_mutex;
     std::set<QString> m_presendMsgGuids;
     thread_safe_queue<std::tuple<QString, QString, QString>> m_toSend;

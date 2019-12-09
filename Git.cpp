@@ -216,11 +216,6 @@ std::queue<std::pair<QString, QString>> Git::GetNewMessages()
     return messages;
 }
 
-void Git::PullMessages()
-{
-    ExecuteGit("pull");
-}
-
 void Git::CloneRepo()
 {
     if(QDir{m_gitRepoPath}.exists())
@@ -233,6 +228,8 @@ void Git::CloneRepo()
 
 void Git::ExecuteGit(const QString& command)
 {
+    std::lock_guard guard{gc_mutex};
+
     auto gitCommand = "git -C \"" + m_gitRepoPath + "\" "
             + "-c user.name='" + m_gitLogin + "' -c user.email='<>' "
             + command;
@@ -242,6 +239,8 @@ void Git::ExecuteGit(const QString& command)
 
 int Git::ExecuteGit2(const QString& command)
 {
+    std::lock_guard guard{gc_mutex};
+
     auto gitCommand = "git -C \"" + m_gitRepoPath + "\" "
             + "-c user.name='" + m_gitLogin + "' -c user.email='<>' "
             + command;
