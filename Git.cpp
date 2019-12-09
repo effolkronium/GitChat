@@ -61,6 +61,8 @@ Git::Git(QString gitUrl, QString login, const QString& password)
             while(0 != ExecuteGit2("push"))
             {
                 std::cout << "\nPRE_PULL\n";
+
+                std::this_thread::sleep_for(1s);
                 if(0 != ExecuteGit2("pull"))
                 {
                     std::cout << "\nFIX_CONFLICTS\n";
@@ -146,7 +148,13 @@ void Git::FixConflicts()
 
         if(!file.resize(file.pos()))
             throw std::runtime_error{"if(!file.resize(file.pos()))"};
+
+        file.flush();
     }
+
+
+    std::this_thread::sleep_for(1s);
+
     std::cout << "\nPRE_ADD_MSG_CONF\n";
     ExecuteGit("add messages");
 
