@@ -36,7 +36,7 @@ Git::Git(QString gitUrl, QString login, const QString& password)
             std::lock_guard guard{m_mutex};
 
             {
-                QFile file(m_gitMessagesPath);
+                QSaveFile file(m_gitMessagesPath);
                 if(!file.open(QIODevice::Append)) {
                     throw std::runtime_error{file.errorString().toUtf8()};
                 }
@@ -52,6 +52,8 @@ Git::Git(QString gitUrl, QString login, const QString& password)
                     m_toSend.wait_and_pop(nextMsg);
                     in << '\n' << std::get<0>(nextMsg) << "," << std::get<1>(nextMsg) << "," << std::get<2>(nextMsg);
                 }
+
+                file.flush();
             }
 
             ExecuteGit("add messages");
@@ -95,9 +97,10 @@ bool Git::IsNewRepo() const
 
 void Git::InitRepo()
 {
-    QFile file(m_gitMessagesPath);
+    {
+    QSaveFile file(m_gitMessagesPath);
     file.open(QIODevice::WriteOnly);
-    file.close();
+    }
     ExecuteGit("add messages");
     ExecuteGit("commit -m\"Git::InitRepo()\"");
     ExecuteGit("push");
