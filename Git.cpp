@@ -56,9 +56,12 @@ Git::Git(QString gitUrl, QString login, const QString& password)
             }
 
             std::this_thread::sleep_for(1s);
+
         #ifndef __WIN32
             QProcess::execute("sync; echo 3 | sudo tee /proc/sys/vm/drop_caches");
         #endif
+
+            std::this_thread::sleep_for(1s);
 
             ExecuteGit("add messages");
             ExecuteGit("commit -m\"Git::PushMessage\"");
@@ -121,6 +124,7 @@ void Git::PushMessage(const QString& author, const QString& message)
 
 void Git::FixConflicts()
 {
+    #ifdef __WIN32
     {
         QFile file(m_gitMessagesPath);
         if(!file.open(QIODevice::ReadWrite |  QIODevice::Append)) {
@@ -163,9 +167,15 @@ void Git::FixConflicts()
 
 
     std::this_thread::sleep_for(1s);
-#ifndef __WIN32
+#else
+    QProcess::execute("sed -i 's/<.*//g' " + m_gitMessagesPath);
+    QProcess::execute("sed -i 's/>.*//g' " + m_gitMessagesPath);
+    QProcess::execute("sed -i 's/=.*//g' " + m_gitMessagesPath);
     QProcess::execute("sync; echo 3 | sudo tee /proc/sys/vm/drop_caches");
 #endif
+
+    std::this_thread::sleep_for(1s);
+
     std::cout << "\nPRE_ADD_MSG_CONF\n";
     ExecuteGit("add messages");
 
