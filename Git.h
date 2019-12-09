@@ -20,6 +20,7 @@ public: // should be thread safe to call simultaneously
     void PushMessage(const QString& author, const QString& message);
     std::queue<std::pair<QString, QString>> GetNewMessages();
 public:
+    void CheckRepoWriteRight();
     void CloneRepo();
     void InitRepo();
     void PullMessages();

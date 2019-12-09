@@ -48,7 +48,7 @@ void GitChat::StartGitListeningThread()
             {
                 auto messages = this->m_git.GetNewMessages();
                 emit SignalAddMessages(std::move(messages));
-                std::this_thread::sleep_for(10s);
+                std::this_thread::sleep_for(4s);
             }
         } catch (const std::exception& err) {
             emit SignalGitThreadError(QString{"Error: "} + err.what());

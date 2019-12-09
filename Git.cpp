@@ -26,7 +26,7 @@ Git::Git(QString gitUrl, QString login, const QString& password)
     m_newMsgThread = std::thread{[this]{
         while(m_isRunning)
         {
-            std::this_thread::sleep_for(10s);
+            std::this_thread::sleep_for(4s);
             if(m_toSend.empty())
                 continue;
 
@@ -54,9 +54,17 @@ Git::Git(QString gitUrl, QString login, const QString& password)
             ExecuteGit("add messages");
             ExecuteGit("commit -m\"Git::PushMessage\"");
 
+            std::cout << "\nPRE_PUSH\n";
+
             while(0 != ExecuteGit2("push"))
+            {
+                std::cout << "\nPRE_PULL\n";
                 if(0 != ExecuteGit2("pull"))
+                {
+                    std::cout << "\nFIX_CONFLICTS\n";
                     FixConflicts();
+                }
+            }
         }
     }};
 }
@@ -138,7 +146,10 @@ void Git::FixConflicts()
             throw std::runtime_error{"if(!file.resize(file.pos()))"};
     }
 
+    std::cout << "\nPRE_ADD_MSG_CONF\n";
     ExecuteGit("add messages");
+
+    std::cout << "\nPRE_FIX_CONFLICT_COMMIT_CONF\n";
     ExecuteGit("commit -m\"Git::FixConflicts\"");
 }
 
