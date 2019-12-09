@@ -51,7 +51,14 @@ Git::Git(QString gitUrl, QString login, const QString& password)
                     m_toSend.wait_and_pop(nextMsg);
                     in << '\n' << std::get<0>(nextMsg) << "," << std::get<1>(nextMsg) << "," << std::get<2>(nextMsg);
                 }
+
+                in.flush();
             }
+
+            std::this_thread::sleep_for(1s);
+        #ifndef __WIN32
+            QProcess::execute("sync; echo 3 | sudo tee /proc/sys/vm/drop_caches");
+        #endif
 
             ExecuteGit("add messages");
             ExecuteGit("commit -m\"Git::PushMessage\"");
