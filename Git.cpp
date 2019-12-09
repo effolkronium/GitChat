@@ -7,7 +7,6 @@
 #include <QTextStream>
 #include <stdexcept>
 #include <iostream>
-#include <QSaveFile>
 
 using namespace std::literals;
 
@@ -36,7 +35,7 @@ Git::Git(QString gitUrl, QString login, const QString& password)
             std::lock_guard guard{m_mutex};
 
             {
-                QSaveFile file(m_gitMessagesPath);
+                QFile file(m_gitMessagesPath);
                 if(!file.open(QIODevice::Append)) {
                     throw std::runtime_error{file.errorString().toUtf8()};
                 }
@@ -52,8 +51,6 @@ Git::Git(QString gitUrl, QString login, const QString& password)
                     m_toSend.wait_and_pop(nextMsg);
                     in << '\n' << std::get<0>(nextMsg) << "," << std::get<1>(nextMsg) << "," << std::get<2>(nextMsg);
                 }
-
-                file.flush();
             }
 
             ExecuteGit("add messages");
@@ -97,10 +94,9 @@ bool Git::IsNewRepo() const
 
 void Git::InitRepo()
 {
-    {
-    QSaveFile file(m_gitMessagesPath);
+    QFile file(m_gitMessagesPath);
     file.open(QIODevice::WriteOnly);
-    }
+    file.close();
     ExecuteGit("add messages");
     ExecuteGit("commit -m\"Git::InitRepo()\"");
     ExecuteGit("push");
@@ -119,7 +115,7 @@ void Git::PushMessage(const QString& author, const QString& message)
 void Git::FixConflicts()
 {
     {
-        QSaveFile file(m_gitMessagesPath);
+        QFile file(m_gitMessagesPath);
         if(!file.open(QIODevice::ReadWrite |  QIODevice::Append)) {
             throw std::runtime_error{file.errorString().toUtf8()};
         }
@@ -160,7 +156,9 @@ void Git::FixConflicts()
 
 
     std::this_thread::sleep_for(1s);
-
+#ifndef __WIN32
+    QProcess::execute("sync; echo 3 | sudo tee /proc/sys/vm/drop_caches");
+#endif
     std::cout << "\nPRE_ADD_MSG_CONF\n";
     ExecuteGit("add messages");
 
