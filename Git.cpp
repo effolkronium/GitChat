@@ -168,9 +168,9 @@ void Git::FixConflicts()
 
     std::this_thread::sleep_for(1s);
 #else
-    QProcess::execute("sed -i 's/<.*//g' " + m_gitMessagesPath);
-    QProcess::execute("sed -i 's/>.*//g' " + m_gitMessagesPath);
-    QProcess::execute("sed -i 's/=.*//g' " + m_gitMessagesPath);
+    QProcess::execute("sed -i \"s/<.*//g\" " + m_gitMessagesPath);
+    QProcess::execute("sed -i \"s/>.*//g\" " + m_gitMessagesPath);
+    QProcess::execute("sed -i \"s/=.*//g\" " + m_gitMessagesPath);
     QProcess::execute("sync; echo 3 | sudo tee /proc/sys/vm/drop_caches");
 #endif
 
