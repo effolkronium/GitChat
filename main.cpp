@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 try {
     QApplication a(argc, argv);
 
-    QProcess::execute("sed -i 's/<.*//g' test");
+    QProcess::execute("sed -i \"s/<.*//g\" test");
 
     QFile f("qdarkstyle/style.qss");
     if (!f.exists())
