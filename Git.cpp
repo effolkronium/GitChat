@@ -110,6 +110,7 @@ void Git::PushMessage(const QString& author, const QString& message)
 
 void Git::FixConflicts()
 {
+#ifdef __WIN32
     {
         QFile file(m_gitMessagesPath);
         if(!file.open(QIODevice::ReadWrite |  QIODevice::Append)) {
@@ -145,7 +146,36 @@ void Git::FixConflicts()
         if(!file.resize(file.pos()))
             throw std::runtime_error{"if(!file.resize(file.pos()))"};
     }
+#else
+    {
+        auto Command = "cd \"" + m_gitRepoPath + "\" && awk '!/^</' messages > messages1";
+        QProcess::execute(Command);
+    }
+    {
+        auto Command = "cd \"" + m_gitRepoPath + "\" && rm messages && mv messages1 messages";
+        QProcess::execute(Command);
+    }
 
+
+    {
+        auto Command = "cd \"" + m_gitRepoPath + "\" && awk '!/^>/' messages > messages1";
+        QProcess::execute(Command);
+    }
+    {
+        auto Command = "cd \"" + m_gitRepoPath + "\" && rm messages && mv messages1 messages";
+        QProcess::execute(Command);
+    }
+
+
+    {
+        auto Command = "cd \"" + m_gitRepoPath + "\" && awk '!/^=/' messages > messages1";
+        QProcess::execute(Command);
+    }
+    {
+        auto Command = "cd \"" + m_gitRepoPath + "\" && rm messages && mv messages1 messages";
+        QProcess::execute(Command);
+    }
+#endif
     std::cout << "\nPRE_ADD_MSG_CONF\n";
     ExecuteGit("add messages");
 
