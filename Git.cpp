@@ -21,7 +21,9 @@ Git::Git(QString gitUrl, QString login, const QString& password)
     CloneRepo();
     if(IsNewRepo())
         InitRepo();
-
+    FixConflicts();
+    QMessageBox m;
+    m.show();
     m_isRunning = true;
     m_newMsgThread = std::thread{[this]{
         while(m_isRunning)
