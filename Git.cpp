@@ -21,7 +21,7 @@ Git::Git(QString gitUrl, QString login, const QString& password)
     CloneRepo();
     if(IsNewRepo())
         InitRepo();
-    FixConflicts();
+
     QMessageBox m;
     m.show();
     m_isRunning = true;
@@ -132,7 +132,7 @@ void Git::FixConflicts()
             while(!in.atEnd()) {
                 QString line = in.readLine();
 
-                if(line.startsWith("<") || line.startsWith("=") || line.startsWith(">"))
+                if(!line.startsWith("{"))
                     continue;
 
                 textWithoutConflits += line += '\n';
