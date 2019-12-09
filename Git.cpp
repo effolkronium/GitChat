@@ -190,15 +190,19 @@ std::queue<std::pair<QString, QString>> Git::GetNewMessages()
             if(m_presendMsgGuids.end() != findIt)
             {
                 isMsgWasPresended = true;
-                m_presendMsgGuids.erase(findIt);
             }
+            else
+            {
+                m_presendMsgGuids.emplace(fields[0]);
+            }
+
         }
 
         if(!isMsgWasPresended)
             messages.emplace(std::move(fields[1]), std::move(fields[2]));
     }
 
-    m_messagePos = file.pos();
+    m_messagePos = 0;
 
     return messages;
 }
