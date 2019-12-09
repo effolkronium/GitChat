@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <stdexcept>
 #include <iostream>
+#include <QSaveFile>
 
 using namespace std::literals;
 
@@ -115,7 +116,7 @@ void Git::PushMessage(const QString& author, const QString& message)
 void Git::FixConflicts()
 {
     {
-        QFile file(m_gitMessagesPath);
+        QSaveFile file(m_gitMessagesPath);
         if(!file.open(QIODevice::ReadWrite |  QIODevice::Append)) {
             throw std::runtime_error{file.errorString().toUtf8()};
         }
@@ -144,6 +145,8 @@ void Git::FixConflicts()
                 throw std::runtime_error{"if(!file.seek(m_messagePos))"};
 
             in << textWithoutConflits;
+
+            in.flush();
         }
 
         if(!file.resize(file.pos()))
